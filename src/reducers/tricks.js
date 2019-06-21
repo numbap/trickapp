@@ -7,7 +7,7 @@ export default (state = tricksReducerDefaultState, action) => {
     case 'ADD_TRICK':
       return [
         ...state,
-        action.tricks
+        action.trick
       ];
     case 'REMOVE_TRICK':
       return state.filter(({ id }) => id !== action.id);

@@ -14,12 +14,30 @@ export const startAddTrick = (trickData = {}) => {
       description = '',
       note = '',
       amount = 0,
-      createdAt = 0
+      createdAt = 0,
+      name = '',
+      duration = 0,
+      script = '',
+      modifiedAt = 0,
+      successCriteria = '',
+      gimmicks = []
+
     } = trickData;
-    const trick = { description, note, amount, createdAt };
+    const trick = { 
+      description, 
+      note, 
+      amount, 
+      createdAt, 
+      modifiedAt, 
+      name, 
+      duration, 
+      script, 
+      successCriteria,
+      gimmicks
+    };
 
     return database.ref(`users/${uid}/tricks`).push(trick).then((ref) => {
-      console.log(ref);
+      console.log(ref.gimmicks);
       dispatch(addTrick({
         id: ref.key,
         ...trick

@@ -22,10 +22,11 @@ export class EditTrickPage extends React.Component {
         </div>
         <div className="content-container">
           <TrickForm
-            expense={this.props.trick}
+            trick={this.props.trick}
             onSubmit={this.onSubmit}
           />
           <button className="button button--secondary" onClick={this.onRemove}>Remove Trick</button>
+          
         </div>
       </div>
     );
