@@ -1,26 +1,43 @@
 import React from 'react';
 import moment from 'moment';
+import ReactDOM from 'react-dom';
+import {Editor, EditorState} from 'draft-js';
 import { SingleDatePicker } from 'react-dates';
 import { timingSafeEqual } from 'crypto';
 import { GimmickSubForm } from './subforms/GimmickSubform';
+import { CriteriaSubForm } from './subforms/CriteriaSubform';
+import { NoteSubForm } from './subforms/NoteSubform';
+import { Component } from '@angular/core';
+
 
 export default class TrickForm extends React.Component {
   constructor(props) {
     super(props);
 
+    let gimmicksExist = false;
+    let notesExist = false;
+    let criteriaExist = false;
+    if(props.trick)
+    {
+      gimmicksExist = props.trick.gimmicks ? true : false
+      notesExist = props.trick.notes ? true : false
+      criteriaExist = props.trick.criteria ? true : false
+    }
+
     this.state = {
-      description: props.trick ? props.trick.description : '',
-      note: props.trick ? props.trick.note : '',
-      amount: props.trick ? (props.trick.amount / 100).toString() : '',
       createdAt: props.trick ? moment(props.trick.createdAt) : moment(),
       name: props.trick ? props.trick.name : '',
-      gimmicks: props.trick ? props.trick.gimmicks : [],
       script: props.trick ? props.trick.script : '',
-      duration: props.trick ? props.trick.duration : '',
+      duration: props.trick ? (props.trick.duration / 100).toString() : '',
+      gimmicks: gimmicksExist ? props.trick.gimmicks : [],
+      criteria: criteriaExist ? props.trick.criteria : [],
+      notes: notesExist ? props.trick.notes : [],
       calendarFocused: false,
       addGimmick: '',
+      addCriteria: '',
       addNote: '',
       addCriteria: '',
+      richScript: EditorState.createEmpty(),
       error: ''
     };
 
@@ -28,20 +45,33 @@ export default class TrickForm extends React.Component {
   }
 
   fixFirebase = () => {
-    const tmpGimmicks = []; 
-    const tmpFirebase = this.state.gimmicks;
-    Object.keys(tmpFirebase).forEach((key, val) => {
-      tmpGimmicks.push(tmpFirebase[key]);
-      console.log(tmpFirebase[key]);
+    let tmpGimmicks = [];
+    this.state.gimmicks.forEach((childGimmick) => {
+      tmpGimmicks.push(childGimmick);
     });
-    console.log('tmpGimmicks',tmpGimmicks);
     this.setState(() => ({ gimmicks: tmpGimmicks }));
+
+
+    let tmpCriteria = [];
+    this.state.criteria.forEach((childCriteria) => {
+      tmpCriteria.push(childCriteria);
+    });
+    this.setState(() => ({ criteria: tmpCriteria }));
+
+
+    let tmpNotes = [];
+    this.state.notes.forEach((childNote) => {
+      tmpNotes.push(childNote);
+    });
+    this.setState(() => ({ notes: tmpNotes }));
+
   };
+
+  onDraftChange = (richScript) => this.setState({richScript});
 
   onDescriptionChange = (e) => {
     const description = e.target.value;
     this.setState(() => ({ description }));
-    console.log(this.state.gimmicks)
   };
   onNameChange = (e) => {
     const name = e.target.value;
@@ -80,23 +110,76 @@ export default class TrickForm extends React.Component {
   onSubmit = (e) => {
     e.preventDefault();
 
-    if (!this.state.description || !this.state.amount) {
-      this.setState(() => ({ error: 'Please provide description and amount.' }));
+    if (!this.state.name) {
+      this.setState(() => ({ error: 'Please provide a name.' }));
     } else {
       this.setState(() => ({ error: '' }));
       this.props.onSubmit({
-        description: this.state.description,
-        amount: parseFloat(this.state.amount, 10) * 100,
+        duration: parseFloat(this.state.duration, 10) * 100,
         createdAt: this.state.createdAt.valueOf(),
-        note: this.state.note,
+        notes: this.state.notes,
         script: this.state.script,
         name: this.state.name,
         gimmicks: this.state.gimmicks,
-        duration: this.state.duration
+        criteria: this.state.criteria
       });
     }
   };
 
+
+
+  ///////////////////////////////////////////////
+  onDeleteNote = (e) => {
+    e.preventDefault();
+    const note = e.target.innerText;
+    const temp = this.state.notes.filter(n => n.name !== note);
+    this.setState(() => ({ notes: temp }));
+  };
+
+  onChangeNote = (e) => {
+    e.preventDefault();
+    const addNote = e.target.value;
+    this.setState(() => ({ addNote: addNote }));
+  };
+
+
+  onAddNote = (e) => {
+    e.preventDefault();
+    
+    if(this.state.notes.filter(n => n.name === this.state.addNote).length === 0)
+    {
+      const note = {'name': this.state.addNote, 'createdAt': 0};
+      this.state.notes.push(note);
+      this.setState(() => ({ addNote: '' }));
+      document.getElementById("notesForm").value = null;
+    }
+  };
+  ///////////////////////////////////////////////
+  onDeleteCriteria = (e) => {
+    e.preventDefault();
+    const name = e.target.innerText;
+    const temp = this.state.criteria.filter(c => c.name !== name);
+    this.setState(() => ({ criteria: temp }));
+  };
+
+  onChangeCriteria = (e) => {
+    e.preventDefault();
+    const addCriteria = e.target.value;
+    this.setState(() => ({ addCriteria: addCriteria }));
+  };
+
+  onAddCriteria = (e) => {
+    e.preventDefault();
+
+    if(this.state.criteria.filter(c => c.name === this.state.addCriteria).length === 0)
+    {
+      const criteria = {'name': this.state.addCriteria, 'createdAt': 0};
+      this.state.criteria.push(criteria);
+      this.setState(() => ({ addCriteria: '' }));
+      document.getElementById("criteriaForm").value = null;
+    }
+  };
+  ///////////////////////////////////////////////
   onDeleteGimmick = (e) => {
     e.preventDefault();
     const name = e.target.innerText;
@@ -112,85 +195,85 @@ export default class TrickForm extends React.Component {
 
   onAddGimmick = (e) => {
     e.preventDefault();
-    const gimmick = {'name': this.state.addGimmick, 'createdAt': 0};
-    this.state.gimmicks.push(gimmick);
-    this.setState(() => ({ addGimmick: '' }));
+    if(this.state.gimmicks.filter(c => c.name === this.state.addGimmick).length === 0)
+    {
+      const gimmick = {'name': this.state.addGimmick, 'createdAt': 0};
+      this.state.gimmicks.push(gimmick);
+      this.setState(() => ({ addGimmick: '' }));
+      document.getElementById("gimmickForm").value = null;
+    }
   };
-
-
-  onGimmickSubmit = (e) => {
-    e.preventDefault();
-    // const gimmick = {'name': this.state.addGimmick, 'createdAt': 0};
-    // this.state.gimmicks.push(gimmick);
-    // this.setState(() => ({ addGimmick: '' }));
-  };
+  ///////////////////////////////////////////////
 
   render() {
 
     return (
-      <div>
-      <form className="form" onSubmit={this.onSubmit}>
-        {this.state.error && <p className="form__error">{this.state.error}</p>}
-        <input
-          type="text"
-          placeholder="Description"
-          autoFocus
-          className="text-input"
-          value={this.state.description}
-          onChange={this.onDescriptionChange}
-        />
-        <input
-          type="text"
-          placeholder="Name"
-          className="text-input"
-          value={this.state.name}
-          onChange={this.onNameChange}
-        />
-        <input
-          type="text"
-          placeholder="Duration"
-          className="text-input"
-          value={this.state.duration}
-          onKeyPress={this.onDurationChange}
-        />
+      <div className="row">
+        <div className="col-lg-12 col-md-12 align-top">
+            <div className="col-lg-12">
+              <form className="form" onSubmit={this.onSubmit}>
+                {this.state.error && <p className="form__error">{this.state.error}</p>}
 
-        <input
-        type="text"
-        placeholder="Amount"
-        className="text-input"
-        value={this.state.amount}
-        onChange={this.onAmountChange}
-        />
+                <input
+                  type="text"
+                  placeholder="Name"
+                  className="form-control"
+                  value={this.state.name}
+                  onChange={this.onNameChange}
+                /><br/>
 
-        <textarea
-          placeholder="Write your script here."
-          className="textarea"
-          value={this.state.script}
-          onChange={this.onScriptChange}
-        >
-        </textarea>
-        <textarea
-          placeholder="Add a note for your expense (optional)"
-          className="textarea"
-          value={this.state.note}
-          onChange={this.onNoteChange}
-        >
-        </textarea>
-        <div>
-          <button className="button">Save Trick</button>
+                <input
+                  type="text"
+                  placeholder="Duration"
+                  className="form-control"
+                  value={this.state.duration}
+                  onChange={this.onDurationChange}
+                /><br/>
+
+                <textarea
+                  placeholder="Write your script here."
+                  className="form-control"
+                  value={this.state.script}
+                  onChange={this.onScriptChange}
+                >
+                </textarea><br/>
+
+                <div>
+                  <button className="btn btn-primary mb-2">Save Trick</button>
+                </div>
+
+              </form>
+
+              <hr />
+            </div>
 
         </div>
-      </form>
-      { console.log('TrickForm', this.state.gimmicks)  }
 
-      <GimmickSubForm 
-      onGimmickSubmit={this.onGimmickSubmit} 
-      addGimmick={this.addGimmick} 
-      onChangeGimmick={this.onChangeGimmick} 
-      onAddGimmick={this.onAddGimmick}  
-      onDeleteGimmick={this.onDeleteGimmick} 
-      gimmicks={this.state.gimmicks} />
+        <div className="col-lg-12 col-md-12 align-top">
 
+          <NoteSubForm 
+          addNote={this.addNote} 
+          onChangeNote={this.onChangeNote} 
+          onAddNote={this.onAddNote}  
+          onDeleteNote={this.onDeleteNote} 
+          notes={ this.state.notes } />
+
+
+          <GimmickSubForm 
+          addGimmick={this.addGimmick} 
+          onChangeGimmick={this.onChangeGimmick} 
+          onAddGimmick={this.onAddGimmick}  
+          onDeleteGimmick={this.onDeleteGimmick} 
+          gimmicks={ this.state.gimmicks } />
+          
+          
+          <CriteriaSubForm 
+          addCriteria={this.addCriteria} 
+          onChangeCriteria={this.onChangeCriteria} 
+          onAddCriteria={this.onAddCriteria}  
+          onDeleteCriteria={this.onDeleteCriteria} 
+          criteria={ this.state.criteria } />
+        </div>
       </div>
 
     )
@@ -199,6 +282,25 @@ export default class TrickForm extends React.Component {
 
 
 
-//       <GimmickSubForm onDeleteGimmick={this.onDeleteGimmick}  onChangeGimmick={this.onChangeGimmick} onDeleteGimmick={this.onDeleteGimmick} {...this.state.gimmicks}/>
 
-// <GimmickSubForm  />
+
+
+
+
+
+
+
+
+// createdAt: props.trick ? moment(props.trick.createdAt) : moment(),
+// name: props.trick ? props.trick.name : '',
+// gimmicks: props.trick.gimmicks && props.trick ? props.trick.gimmicks : [],
+// criteria: props.trick.criteria ? props.trick.criteria : [],
+// notes: props.trick.notes ? props.trick.notes : [],
+// script: props.trick ? props.trick.script : '',
+// duration: props.trick ? (props.trick.duration / 100).toString() : '',
+// calendarFocused: false,
+// addGimmick: '',
+// addCriteria: '',
+// addNote: '',
+// addCriteria: '',
+// error: ''2575

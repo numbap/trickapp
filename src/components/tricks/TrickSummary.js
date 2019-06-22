@@ -10,13 +10,7 @@ export const TricksSummary = ({ trickCount, tricksTotal }) => {
   const formattedTricksTotal = numeral(tricksTotal / 100).format('$0,0.00');
 
   return (
-    <div className="page-header">
-      <div className="content-container">
-        <h1 className="page-header__title">Viewing <span>{trickCount}</span> {tricksWord} totalling <span>{formattedTricksTotal}</span></h1>
-        <div className="page-header__actions">
-          <Link className="button" to="/create">Add Trick</Link>
-        </div>
-      </div>
+    <div className="col-lg-12">
     </div>
   );
 };

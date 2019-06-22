@@ -12,16 +12,19 @@ export class AddTrickPage extends React.Component {
   render() {
     return (
       <div>
-        <div className="page-header">
-          <div className="content-container">
-            <h1 className="page-header__title">Add Trick</h1>
+
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-12 ">
+              <h1>Add Trick</h1>
+            </div>
           </div>
         </div>
-        <div className="content-container">
+
           <TrickForm
             onSubmit={this.onSubmit}
           />
-        </div>
+          <hr/>
       </div>
     );
   }

@@ -11,33 +11,28 @@ export const startAddTrick = (trickData = {}) => {
   return (dispatch, getState) => {
     const uid = getState().auth.uid;
     const {
-      description = '',
-      note = '',
-      amount = 0,
       createdAt = 0,
       name = '',
       duration = 0,
       script = '',
       modifiedAt = 0,
-      successCriteria = '',
-      gimmicks = []
+      gimmicks = [],
+      criteria = [],
+      notes = []
 
     } = trickData;
     const trick = { 
-      description, 
-      note, 
-      amount, 
       createdAt, 
       modifiedAt, 
       name, 
       duration, 
       script, 
-      successCriteria,
-      gimmicks
+      gimmicks,
+      criteria, 
+      notes
     };
 
     return database.ref(`users/${uid}/tricks`).push(trick).then((ref) => {
-      console.log(ref.gimmicks);
       dispatch(addTrick({
         id: ref.key,
         ...trick

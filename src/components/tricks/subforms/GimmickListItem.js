@@ -4,7 +4,7 @@ import moment from 'moment';
 import numeral from 'numeral';
 
 export const GimmickListItem = ({ onDeleteGimmick, name, createdAt }) => (
-  <li> dddd</li>
+  <li className="list-group-item" onDoubleClick={onDeleteGimmick}>{name}</li>
 );
 
 export default GimmickListItem;
