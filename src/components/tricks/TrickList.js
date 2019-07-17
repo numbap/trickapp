@@ -5,8 +5,6 @@ import selectTricks from '../../selectors/tricks';
 
 export const TrickList = (props) => (
   <div className="col-lg-12">
-
-
       <table className="table table-striped">
       <thead>
         <tr>

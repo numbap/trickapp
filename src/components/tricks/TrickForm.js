@@ -1,14 +1,9 @@
 import React from 'react';
 import moment from 'moment';
-import ReactDOM from 'react-dom';
-import {Editor, EditorState} from 'draft-js';
-import { SingleDatePicker } from 'react-dates';
-import { timingSafeEqual } from 'crypto';
+import {EditorState} from 'draft-js';
 import { GimmickSubForm } from './subforms/GimmickSubform';
 import { CriteriaSubForm } from './subforms/CriteriaSubform';
 import { NoteSubForm } from './subforms/NoteSubform';
-import { Component } from '@angular/core';
-
 
 export default class TrickForm extends React.Component {
   constructor(props) {
@@ -51,13 +46,11 @@ export default class TrickForm extends React.Component {
     });
     this.setState(() => ({ gimmicks: tmpGimmicks }));
 
-
     let tmpCriteria = [];
     this.state.criteria.forEach((childCriteria) => {
       tmpCriteria.push(childCriteria);
     });
     this.setState(() => ({ criteria: tmpCriteria }));
-
 
     let tmpNotes = [];
     this.state.notes.forEach((childNote) => {
@@ -126,9 +119,8 @@ export default class TrickForm extends React.Component {
     }
   };
 
-
-
   ///////////////////////////////////////////////
+
   onDeleteNote = (e) => {
     e.preventDefault();
     const note = e.target.innerText;
@@ -142,7 +134,6 @@ export default class TrickForm extends React.Component {
     this.setState(() => ({ addNote: addNote }));
   };
 
-
   onAddNote = (e) => {
     e.preventDefault();
     
@@ -154,7 +145,9 @@ export default class TrickForm extends React.Component {
       document.getElementById("notesForm").value = null;
     }
   };
+
   ///////////////////////////////////////////////
+  
   onDeleteCriteria = (e) => {
     e.preventDefault();
     const name = e.target.innerText;
@@ -179,7 +172,9 @@ export default class TrickForm extends React.Component {
       document.getElementById("criteriaForm").value = null;
     }
   };
+  
   ///////////////////////////////////////////////
+
   onDeleteGimmick = (e) => {
     e.preventDefault();
     const name = e.target.innerText;
@@ -203,6 +198,7 @@ export default class TrickForm extends React.Component {
       document.getElementById("gimmickForm").value = null;
     }
   };
+
   ///////////////////////////////////////////////
 
   render() {
@@ -243,10 +239,8 @@ export default class TrickForm extends React.Component {
                 </div>
 
               </form>
-
               <hr />
             </div>
-
         </div>
 
         <div className="col-lg-12 col-md-12 align-top">
@@ -258,14 +252,12 @@ export default class TrickForm extends React.Component {
           onDeleteNote={this.onDeleteNote} 
           notes={ this.state.notes } />
 
-
           <GimmickSubForm 
           addGimmick={this.addGimmick} 
           onChangeGimmick={this.onChangeGimmick} 
           onAddGimmick={this.onAddGimmick}  
           onDeleteGimmick={this.onDeleteGimmick} 
           gimmicks={ this.state.gimmicks } />
-          
           
           <CriteriaSubForm 
           addCriteria={this.addCriteria} 
@@ -279,28 +271,3 @@ export default class TrickForm extends React.Component {
     )
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-// createdAt: props.trick ? moment(props.trick.createdAt) : moment(),
-// name: props.trick ? props.trick.name : '',
-// gimmicks: props.trick.gimmicks && props.trick ? props.trick.gimmicks : [],
-// criteria: props.trick.criteria ? props.trick.criteria : [],
-// notes: props.trick.notes ? props.trick.notes : [],
-// script: props.trick ? props.trick.script : '',
-// duration: props.trick ? (props.trick.duration / 100).toString() : '',
-// calendarFocused: false,
-// addGimmick: '',
-// addCriteria: '',
-// addNote: '',
-// addCriteria: '',
-// error: ''2575
