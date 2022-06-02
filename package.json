@@ -13,7 +13,7 @@
     "heroku-postbuild": "yarn run build:prod"
   },
   "dependencies": {
-    "@angular/core": "^8.0.2",
+    "@angular/core": "^11.0.5",
     "babel-cli": "6.24.1",
     "babel-core": "6.25.0",
     "babel-loader": "7.1.1",
